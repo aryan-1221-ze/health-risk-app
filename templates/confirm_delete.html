@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Delete record #{{ patient['id'] }} - HealthRecord AI{% endblock %}
+{% block content %}
+  <h1>Delete record #{{ patient['id'] }}?</h1>
+  <p class="lead">This permanently removes the record below from the database.</p>
+  <dl class="details">
+    <dt>Full name</dt><dd>{{ patient['full_name'] }}</dd>
+    <dt>Date of birth</dt><dd>{{ patient['date_of_birth']|display_date }}</dd>
+    <dt>Email</dt><dd>{{ patient['email'] }}</dd>
+  </dl>
+  <form method="post" class="form-actions">
+    <button type="submit" class="button button-danger">Delete record</button>
+    <a class="button" href="{{ url_for('index') }}">Keep record</a>
+  </form>
+{% endblock %}

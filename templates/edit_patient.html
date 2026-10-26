@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% from "_patient_form.html" import patient_form %}
+{% block title %}Edit record #{{ patient['id'] }} - HealthRecord AI{% endblock %}
+{% block content %}
+  <h1>Edit record #{{ patient['id'] }}</h1>
+  <p class="lead">Changing only the name or email keeps the existing remarks. Changing the date of birth or a
+  blood value asks the AI service for new remarks.</p>
+  {{ patient_form(form, errors, "Save changes", "Saving...", url_for('index')) }}
+{% endblock %}

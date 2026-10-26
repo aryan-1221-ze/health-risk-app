@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Record #{{ patient['id'] }} - HealthRecord AI{% endblock %}
+{% block content %}
+  <h1>Record #{{ patient['id'] }}: {{ patient['full_name'] }}</h1>
+  <dl class="details">
+    <dt>Date of birth</dt><dd>{{ patient['date_of_birth']|display_date }}</dd>
+    <dt>Email</dt><dd>{{ patient['email'] }}</dd>
+    <dt>Glucose</dt><dd>{{ patient['glucose']|number }} mg/dL</dd>
+    <dt>Haemoglobin</dt><dd>{{ patient['haemoglobin']|number }} g/dL</dd>
+    <dt>Cholesterol</dt><dd>{{ patient['cholesterol']|number }} mg/dL</dd>
+    <dt>Created (UTC)</dt><dd>{{ patient['created_at'] }}</dd>
+    <dt>Last updated (UTC)</dt><dd>{{ patient['updated_at'] }}</dd>
+    <dt>AI status</dt>
+    <dd>
+      {% if patient['remarks'] %}
+        <span class="badge badge-ok">AI remarks generated</span>
+      {% else %}
+        <span class="badge badge-warn">AI service unavailable</span>
+      {% endif %}
+    </dd>
+    <dt>Remarks</dt>
+    <dd>
+      {% if patient['remarks'] %}
+        <p class="remarks">{{ patient['remarks'] }}</p>
+        <p class="hint">Informational and unvalidated. Not a diagnosis.</p>
+      {% else %}
+        <p>No AI remarks have been generated for this record.</p>
+        {% if patient['ai_error'] %}<p class="hint">Reason: {{ patient['ai_error'] }}</p>{% endif %}
+      {% endif %}
+    </dd>
+  </dl>
+  <div class="form-actions">
+    <a class="button button-primary" href="{{ url_for('edit_patient', patient_id=patient['id']) }}">Edit</a>
+    {% if not patient['remarks'] %}
+      <form method="post" action="{{ url_for('retry_ai', patient_id=patient['id']) }}" data-busy-text="Asking the AI service...">
+        <button type="submit" class="button">Retry AI remarks</button>
+      </form>
+    {% endif %}
+    <a class="button button-danger-outline" href="{{ url_for('delete_patient', patient_id=patient['id']) }}">Delete</a>
+    <a class="button" href="{{ url_for('index') }}">Back to records</a>
+  </div>
+{% endblock %}

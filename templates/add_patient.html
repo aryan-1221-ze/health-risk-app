@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% from "_patient_form.html" import patient_form %}
+{% block title %}Add record - HealthRecord AI{% endblock %}
+{% block content %}
+  <h1>Add record</h1>
+  <p class="lead">Valid records are saved to the local database, then the values are sent to the AI service
+  to generate remarks. Invalid records are not saved and are not sent to the AI service.</p>
+  {{ patient_form(form, errors, "Save record", "Saving and asking the AI service...", url_for('index')) }}
+{% endblock %}

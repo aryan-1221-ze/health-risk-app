@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="page-heading">
+    <h1>Patient records</h1>
+    <a class="button button-primary" href="{{ url_for('add_patient') }}">Add record</a>
+  </div>
+
+  {% if not ai_configured %}
+    <div class="notice notice-warning">
+      The AI service is not configured. Set GEMINI_API_KEY in the .env file and restart the app.
+      Records can still be saved, but their remarks will stay empty until the key is set.
+    </div>
+  {% endif %}
+
+  <p class="summary">
+    <strong>{{ total }}</strong> saved {{ "record" if total == 1 else "records" }}:
+    {{ with_remarks }} with AI remarks, {{ without_remarks }} without
+    {%- if possible_duplicates %}, {{ possible_duplicates }} flagged as possible duplicates{% endif %}.
+    Submissions that fail validation are not saved, so they do not appear here.
+  </p>
+
+  {% if patients %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Full name</th>
+            <th scope="col">Date of birth</th>
+            <th scope="col">Email</th>
+            <th scope="col" class="num">Glucose (mg/dL)</th>
+            <th scope="col" class="num">Haemoglobin (g/dL)</th>
+            <th scope="col" class="num">Cholesterol (mg/dL)</th>
+            <th scope="col">Remarks</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for patient in patients %}
+            <tr>
+              <td>{{ patient['id'] }}</td>
+              <td>
+                {{ patient['full_name'] }}
+                {% if patient['duplicate_count'] %}<span class="badge badge-warn">Possible duplicate</span>{% endif %}
+              </td>
+              <td>{{ patient['date_of_birth']|display_date }}</td>
+              <td>{{ patient['email'] }}</td>
+              <td class="num">{{ patient['glucose']|number }}</td>
+              <td class="num">{{ patient['haemoglobin']|number }}</td>
+              <td class="num">{{ patient['cholesterol']|number }}</td>
+              <td class="remarks-cell">
+                {% if patient['remarks'] %}
+                  <span class="badge badge-ok">AI remarks generated</span>
+                  <p class="remarks">{{ patient['remarks'] }}</p>
+                {% else %}
+                  <span class="badge badge-warn">AI service unavailable</span>
+                  {% if patient['ai_error'] %}<p class="hint">{{ patient['ai_error'] }}</p>{% endif %}
+                  <form method="post" action="{{ url_for('retry_ai', patient_id=patient['id']) }}" data-busy-text="Asking the AI service...">
+                    <button type="submit" class="button button-small">Retry AI remarks</button>
+                  </form>
+                {% endif %}
+              </td>
+              <td class="actions">
+                <a href="{{ url_for('patient_detail', patient_id=patient['id']) }}">View</a>
+                <a href="{{ url_for('edit_patient', patient_id=patient['id']) }}">Edit</a>
+                <a href="{{ url_for('delete_patient', patient_id=patient['id']) }}">Delete</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty">No records saved yet. <a href="{{ url_for('add_patient') }}">Add the first record</a>.</p>
+  {% endif %}
+{% endblock %}

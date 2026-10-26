@@ -1,0 +1,36 @@
+{% macro text_field(name, label, form, errors, hint="", type="text", inputmode="", placeholder="") %}
+  <div class="field{% if errors.get(name) %} has-error{% endif %}">
+    <label for="{{ name }}">{{ label }}</label>
+    <input id="{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ form.get(name, '') }}"
+           {% if inputmode %}inputmode="{{ inputmode }}"{% endif %}
+           {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+           autocomplete="off"
+           {% if errors.get(name) %}aria-invalid="true" aria-describedby="{{ name }}-error"{% endif %}>
+    {% if hint %}<span class="hint">{{ hint }}</span>{% endif %}
+    {% if errors.get(name) %}<span class="error-text" id="{{ name }}-error">{{ errors[name] }}</span>{% endif %}
+  </div>
+{% endmacro %}
+
+{% macro patient_form(form, errors, submit_label, busy_label, cancel_url) %}
+  {% if errors %}
+    <div class="notice notice-error" role="alert">
+      The record was not saved. Fix the {{ errors|length }} highlighted
+      {{ "field" if errors|length == 1 else "fields" }} and try again.
+    </div>
+  {% endif %}
+  {# novalidate lets the server-side checks run and show their messages. #}
+  <form method="post" novalidate data-busy-text="{{ busy_label }}">
+    {{ text_field("full_name", "Full name", form, errors) }}
+    {{ text_field("date_of_birth", "Date of birth", form, errors, hint="Format dd/mm/yyyy", placeholder="dd/mm/yyyy") }}
+    {{ text_field("email", "Email address", form, errors, type="email") }}
+    <div class="field-row">
+      {{ text_field("glucose", "Glucose (mg/dL)", form, errors, inputmode="decimal") }}
+      {{ text_field("haemoglobin", "Haemoglobin (g/dL)", form, errors, inputmode="decimal") }}
+      {{ text_field("cholesterol", "Cholesterol (mg/dL)", form, errors, inputmode="decimal") }}
+    </div>
+    <div class="form-actions">
+      <button type="submit" class="button button-primary">{{ submit_label }}</button>
+      <a class="button" href="{{ cancel_url }}">Cancel</a>
+    </div>
+  </form>
+{% endmacro %}
